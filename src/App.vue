@@ -7,6 +7,7 @@
     <PricingSection />
     <DownloadSection />
     <FAQSection />
+    <NewsletterSection />
     <Footer />
 </template>
 
@@ -23,7 +24,8 @@
     import Footer from "./components/landing/Footer.vue"    
     import DownloadSection from "./components/landing/DownloadSection.vue";
     import FAQSection from './components/landing/FAQSection.vue'
-    
+import NewsletterSection from './components/landing/NewsletterSection.vue'
+
     export default {
         name: 'App',
         components: {
@@ -34,7 +36,9 @@
             TestimonialsSection,
             PricingSection,
             Footer,
-            DownloadSection
+            DownloadSection,
+            FAQSection,
+            NewsletterSection
         }
     }
 </script>
