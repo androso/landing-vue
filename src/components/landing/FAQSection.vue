@@ -97,8 +97,8 @@ const goToPage = (page) => {
       </div>
 
       <div class="max-w-3xl mx-auto space-y-6">
-        <div v-for="(faq, index) in paginatedFAQs" :key="index" class="bg-white rounded-xl shadow-sm p-6">
-          <button class="flex justify-between items-center w-full focus:outline-none" @click="toggleFaq(index)">
+        <div v-for="(faq, index) in paginatedFAQs" v-bind:key="index" class="bg-white rounded-xl shadow-sm p-6">
+          <button class="flex justify-between items-center w-full focus:outline-none" v-on:click="toggleFaq(index)">
             <h3 class="font-bold text-lg text-left">{{ faq.question }}</h3>
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary transform transition-transform duration-200"
               v-bind:class="{ 'rotate-180': openedFaq === index }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -110,13 +110,12 @@ const goToPage = (page) => {
           </div>
         </div>
 
-        <!-- Pagination -->
         <div class="flex justify-center space-x-2 mt-8" v-if="totalPages > 1">
           <button 
             v-for="page in totalPages" 
-            :key="page"
-            @click="goToPage(page)"
-            :class="[
+            v-bind:key="page"
+            v-on:click="goToPage(page)"
+            v-bind:class="[
               'px-4 py-2 rounded-lg',
               currentPage === page 
                 ? 'bg-primary text-white' 

@@ -4,7 +4,7 @@
       <div class="max-w-2xl mx-auto text-center">
         <h2 class="text-3xl font-bold mb-4">Stay Updated</h2>
         <p class="text-gray-600 mb-8">Subscribe to our newsletter to get notified when we launch and receive language learning tips.</p>
-        <form @submit.prevent="handleSubmit" class="flex flex-col max-w-xl mx-auto gap-4">
+        <form v-on:submit.prevent="handleSubmit" class="flex flex-col max-w-xl mx-auto gap-4">
           <input 
             type="text" 
             v-model="name"
