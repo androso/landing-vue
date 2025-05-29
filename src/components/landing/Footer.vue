@@ -4,14 +4,16 @@
           <div class="flex flex-col md:flex-row justify-between items-center text-center md:text-left">
               <div class="mb-8 md:mb-0">
                   <div class="flex items-center mb-4">
-                      <div class="mr-2 p-2 rounded-full bg-primary-light">
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" fill="none"
-                              viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                          </svg>
-                      </div>
-                      <span class="text-xl font-bold text-primary">mentarie</span>
+                      <router-link to="/" class="flex items-center">
+                          <div class="mr-2 p-2 rounded-full bg-primary-light">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" fill="none"
+                                  viewBox="0 0 24 24" stroke="currentColor">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                              </svg>
+                          </div>
+                          <span class="text-xl font-bold text-primary">mentarie</span>
+                      </router-link>
                   </div>
                   <p class="text-gray-600 max-w-xs">Transforming language learning through natural conversations, one
                       dialogue at a time.</p>
@@ -22,7 +24,7 @@
                       <h4 class="font-bold mb-4">Product</h4>
                       <ul class="space-y-2">
                           <li><a href="#features" class="text-gray-600 hover:text-primary">Features</a></li>
-                          <li><a href="#pricing" class="text-gray-600 hover:text-primary">Pricing</a></li>
+                          <li><router-link to="/pricing" class="text-gray-600 hover:text-primary">Pricing</router-link></li>
                           <li><a href="#download" class="text-gray-600 hover:text-primary">Download</a></li>
                           <li><a href="#demo" class="text-gray-600 hover:text-primary">Demo</a></li>
                       </ul>
@@ -31,9 +33,9 @@
                   <div>
                       <h4 class="font-bold mb-4">Support</h4>
                       <ul class="space-y-2">
-                          <li><a href="#faq" class="text-gray-600 hover:text-primary">FAQ</a></li>
+                          <li><router-link to="/faq" class="text-gray-600 hover:text-primary">FAQ</router-link></li>
                           <li><a href="#help" class="text-gray-600 hover:text-primary">Help Center</a></li>
-                          <li><a href="#contact" class="text-gray-600 hover:text-primary">Contact Us</a></li>
+                          <li><router-link to="/contact" class="text-gray-600 hover:text-primary">Contact Us</router-link></li>
                           <li><a href="#community" class="text-gray-600 hover:text-primary">Community</a></li>
                       </ul>
                   </div>
@@ -41,7 +43,7 @@
                   <div>
                       <h4 class="font-bold mb-4">Company</h4>
                       <ul class="space-y-2">
-                          <li><a href="#about" class="text-gray-600 hover:text-primary">About Us</a></li>
+                          <li><router-link to="/about" class="text-gray-600 hover:text-primary">About Us</router-link></li>
                           <li><a href="#careers" class="text-gray-600 hover:text-primary">Careers</a></li>
                           <li><a href="#blog" class="text-gray-600 hover:text-primary">Blog</a></li>
                           <li><a href="#press" class="text-gray-600 hover:text-primary">Press</a></li>
