@@ -1,5 +1,6 @@
 <template>
     <router-view />
+    <ExitIntentPopup />
 </template>
 
 <style>
@@ -7,7 +8,12 @@
 </style>
 
 <script>
+import ExitIntentPopup from './components/ExitIntentPopup.vue'
+
 export default {
-    name: 'App'
+    name: 'App',
+    components: {
+        ExitIntentPopup
+    }
 }
 </script>
