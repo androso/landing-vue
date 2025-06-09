@@ -1,11 +1,61 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* Base styles */
 html {
   height: 100%;
   width: 100%;
 }
 
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Hide floating elements on very small screens */
 @media (max-width: 350px) {
   .fixed.bottom-6.right-6 {
     display: none;
+  }
+}
+
+/* Custom component classes using Tailwind's @layer directive */
+@layer components {
+  .btn-primary {
+    @apply bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-100 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-200 transition-colors;
+  }
+
+  .btn-outline {
+    @apply border border-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-50 transition-colors;
+  }
+
+  .feature-card {
+    @apply rounded-2xl p-6 bg-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl;
+  }
+
+  .testimonial {
+    @apply rounded-xl bg-white p-6 shadow-lg;
+  }
+
+  .circle-icon {
+    @apply w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mb-4;
+  }
+
+  .wave-graphic {
+    @apply rounded-full w-60 h-60 bg-white relative overflow-hidden shadow-lg;
+  }
+
+  .wave {
+    @apply absolute bottom-0 w-full h-3/5 bg-blue-600;
+  }
+
+  .wave:before {
+    @apply absolute -top-4 w-full h-5 bg-blue-100 rounded-full;
+    content: '';
   }
 }
 
@@ -17,7 +67,6 @@ html {
 }
 
 body {
-  font-family: 'Inter', sans-serif;
   color: var(--text);
 }
 
@@ -31,51 +80,6 @@ body {
 
 .text-primary {
   color: var(--primary);
-}
-
-.btn-primary {
-  background-color: var(--primary);
-  color: white;
-  padding: 12px 24px;
-  border-radius: 50px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
-}
-
-.feature-card {
-  border-radius: 16px;
-  padding: 24px;
-  background-color: white;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
-}
-
-.feature-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
-}
-
-.testimonial {
-  border-radius: 12px;
-  background-color: white;
-  padding: 24px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-}
-
-.circle-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background-color: var(--primary-light);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16px;
 }
 
 .wave-graphic {
@@ -105,5 +109,38 @@ body {
   height: 20px;
   background-color: var(--primary-light);
   border-radius: 50%;
+}
+
+/* Primary theme colors */
+.text-primary {
+  @apply text-blue-600;
+}
+
+.bg-primary {
+  @apply bg-blue-600;
+}
+
+.bg-primary-light {
+  @apply bg-blue-100;
+}
+
+.bg-primary-dark {
+  @apply bg-blue-700;
+}
+
+.border-primary {
+  @apply border-blue-600;
+}
+
+.hover\:bg-primary-dark:hover {
+  @apply hover:bg-blue-700;
+}
+
+.hover\:text-primary:hover {
+  @apply hover:text-blue-600;
+}
+
+.focus\:ring-primary:focus {
+  @apply focus:ring-blue-500;
 }
 
