@@ -16,6 +16,12 @@
           <div class="hidden lg:flex items-center space-x-8">
               <router-link to="/" class="text-gray-600 hover:text-primary transition-colors">Home</router-link>
               <router-link to="/about" class="text-gray-600 hover:text-primary transition-colors">About</router-link>
+              <router-link to="/exam-trial" class="text-gray-600 hover:text-primary transition-colors flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  Free Trial
+              </router-link>
               <router-link to="/pricing" class="text-gray-600 hover:text-primary transition-colors">Pricing</router-link>
               <router-link to="/faq" class="text-gray-600 hover:text-primary transition-colors">FAQ</router-link>
               <router-link to="/contact" class="text-gray-600 hover:text-primary transition-colors">Contact</router-link>
