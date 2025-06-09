@@ -6,6 +6,9 @@ import About from '../views/About.vue'
 import Pricing from '../views/Pricing.vue'
 import FAQ from '../views/FAQ.vue'
 import Contact from '../views/Contact.vue'
+import ExamTrial from '../views/ExamTrial.vue'
+import ExamInterface from '../views/ExamInterface.vue'
+import ExamResults from '../views/ExamResults.vue'
 
 const routes = [
   {
@@ -17,6 +20,26 @@ const routes = [
     path: '/about',
     name: 'About',
     component: About
+  },
+  {
+    path: '/exam-trial',
+    name: 'ExamTrial',
+    component: ExamTrial,
+    meta: { title: 'Free English Proficiency Trial' }
+  },
+  {
+    path: '/exam/:sessionId',
+    name: 'ExamInterface',
+    component: ExamInterface,
+    meta: { title: 'English Proficiency Exam' },
+    props: true
+  },
+  {
+    path: '/exam/:sessionId/results',
+    name: 'ExamResults',
+    component: ExamResults,
+    meta: { title: 'Exam Results' },
+    props: true
   },
   {
     path: '/pricing',
@@ -50,6 +73,16 @@ const router = createRouter({
       return { top: 0 }
     }
   }
+})
+
+// Update page title based on route meta
+router.beforeEach((to, from, next) => {
+  if (to.meta.title) {
+    document.title = `${to.meta.title} | Mentarie`
+  } else {
+    document.title = 'Mentarie - Language Learning Platform'
+  }
+  next()
 })
 
 export default router 
