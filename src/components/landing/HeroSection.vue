@@ -15,7 +15,7 @@
               </div>
               <div class="md:w-1/2 flex justify-center">
                   <div class="relative">
-                      <img src="https://placehold.co/300x600" alt="Mentarie App"
+                      <img src="@/assets/mentarie.jpg" alt="Mentarie App"
                           class="rounded-3xl shadow-xl z-10 relative" />
                       <div class="absolute top-1/4 -left-8 bg-primary-light rounded-full w-16 h-16 z-0"></div>
                       <div class="absolute bottom-1/4 -right-8 bg-primary rounded-full w-24 h-24 z-0 opacity-20">

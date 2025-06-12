@@ -13,6 +13,7 @@
                   <span class="text-xl font-bold text-primary">mentarie</span>
               </router-link>
           </div>
+          <!-- Desktop Navigation -->
           <div class="hidden lg:flex items-center space-x-8">
               <router-link to="/" class="text-gray-600 hover:text-primary transition-colors">Home</router-link>
               <router-link to="/about" class="text-gray-600 hover:text-primary transition-colors">About</router-link>
@@ -26,6 +27,19 @@
               <router-link to="/checkout" class="text-gray-600 hover:text-primary transition-colors">Checkout</router-link>
               <router-link to="/faq" class="text-gray-600 hover:text-primary transition-colors">FAQ</router-link>
               <router-link to="/contact" class="text-gray-600 hover:text-primary transition-colors">Contact</router-link>
+          </div>
+
+          <!-- Mobile Hamburger Menu -->
+          <div class="lg:hidden">
+              <button 
+                @click="isOpen = !isOpen"
+                class="text-gray-600 hover:text-primary transition-colors p-2"
+              >
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path v-if="!isOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                  <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
           </div>
           
           <!-- Right side - Cart & User section -->
@@ -83,6 +97,103 @@
                 Sign In
               </button>
           </div>
+      </div>
+
+      <!-- Mobile Navigation Menu -->
+      <div v-if="isOpen" class="lg:hidden">
+        <div class="px-2 pt-2 pb-3 space-y-1 bg-white border-t border-gray-200">
+          <router-link 
+            to="/" 
+            @click="isOpen = false"
+            class="block px-3 py-2 text-gray-600 hover:text-primary transition-colors"
+          >
+            Home
+          </router-link>
+          <router-link 
+            to="/about" 
+            @click="isOpen = false"
+            class="block px-3 py-2 text-gray-600 hover:text-primary transition-colors"
+          >
+            About
+          </router-link>
+          <router-link 
+            to="/exam-trial" 
+            @click="isOpen = false"
+            class="block px-3 py-2 text-gray-600 hover:text-primary transition-colors"
+          >
+            <div class="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              Free Trial
+            </div>
+          </router-link>
+          <router-link 
+            to="/pricing" 
+            @click="isOpen = false"
+            class="block px-3 py-2 text-gray-600 hover:text-primary transition-colors"
+          >
+            Pricing
+          </router-link>
+          <router-link 
+            to="/checkout" 
+            @click="isOpen = false"
+            class="block px-3 py-2 text-gray-600 hover:text-primary transition-colors"
+          >
+            Checkout
+          </router-link>
+          <router-link 
+            to="/faq" 
+            @click="isOpen = false"
+            class="block px-3 py-2 text-gray-600 hover:text-primary transition-colors"
+          >
+            FAQ
+          </router-link>
+          <router-link 
+            to="/contact" 
+            @click="isOpen = false"
+            class="block px-3 py-2 text-gray-600 hover:text-primary transition-colors"
+          >
+            Contact
+          </router-link>
+          
+          <!-- Mobile User Menu (when authenticated) -->
+          <div v-if="isAuthenticated" class="border-t border-gray-200 pt-2">
+            <div class="px-3 py-2 text-sm text-gray-500">
+              Welcome, {{ userName }}
+            </div>
+            <router-link 
+              to="/dashboard" 
+              @click="isOpen = false"
+              class="block px-3 py-2 text-gray-600 hover:text-primary transition-colors"
+            >
+              Dashboard
+            </router-link>
+            <router-link 
+              to="/dashboard" 
+              @click="isOpen = false"
+              class="block px-3 py-2 text-gray-600 hover:text-primary transition-colors"
+            >
+              Profile
+            </router-link>
+            <button 
+              @click="handleLogout"
+              class="block w-full text-left px-3 py-2 text-gray-600 hover:text-primary transition-colors"
+            >
+              Sign Out
+            </button>
+          </div>
+          
+          <!-- Mobile Sign In (when not authenticated) -->
+          <div v-else class="border-t border-gray-200 pt-2">
+            <button 
+              @click="showLoginModal = true; isOpen = false"
+              class="block w-full text-left px-3 py-2 text-primary font-medium"
+            >
+              Sign In
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- Cart Dropdown -->
@@ -224,9 +335,19 @@ export default {
         await examAPI.logout()
         this.cartItems = []
         this.showUserMenu = false
+        this.isOpen = false // Close mobile menu if open
         this.showSuccessMessage('Successfully logged out')
+        
+        // Refresh the website to ensure clean state
+        setTimeout(() => {
+          window.location.reload()
+        }, 1000) // Give time for success message to show
       } catch (error) {
         console.error('Logout error:', error)
+        // Still refresh even if logout fails to ensure clean UI state
+        setTimeout(() => {
+          window.location.reload()
+        }, 1000)
       }
     },
 
@@ -305,6 +426,10 @@ export default {
       if (!event.target.closest('.relative')) {
         this.showCart = false
         this.showUserMenu = false
+      }
+      // Close mobile menu when clicking outside
+      if (!event.target.closest('nav') && this.isOpen) {
+        this.isOpen = false
       }
     }
   }
