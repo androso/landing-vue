@@ -10,7 +10,35 @@
           Question {{ questionNumber }} of {{ totalQuestions }}
         </span>
       </div>
-      <h2 class="text-xl font-semibold text-gray-900">{{ question.content }}</h2>
+      
+      <!-- Question Content - Hidden for listening unless user wants to see it -->
+      <div v-if="question.type === 'listening'">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-semibold text-gray-900">Listen to the audio and answer the question</h2>
+          <button 
+            @click="showListeningText = !showListeningText"
+            class="text-sm text-primary hover:text-primary-dark underline focus:outline-none"
+          >
+            {{ showListeningText ? 'Hide Text' : 'Show Text' }}
+          </button>
+        </div>
+        
+        <!-- Listening question text (hidden by default) -->
+        <div v-if="showListeningText" class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <div class="flex items-start">
+            <svg class="h-5 w-5 text-yellow-600 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div>
+              <p class="text-sm text-yellow-800 font-medium mb-1">Text Reference (Optional)</p>
+              <p class="text-gray-700">{{ question.content }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Regular question content for non-listening questions -->
+      <h2 v-else class="text-xl font-semibold text-gray-900">{{ question.content }}</h2>
     </div>
 
     <!-- Audio Player for Listening Questions -->
@@ -61,31 +89,46 @@
         </div>
       </div>
 
-      <!-- Audio Recording (Listening) -->
+      <!-- Listening Questions - Multiple Choice or Text Input -->
       <div v-else-if="question.type === 'listening'" class="space-y-4">
-        <AudioRecorder 
-          @recording-complete="handleAudioRecording"
-          @recording-error="handleRecordingError"
-          :isRecording="isRecording"
-          @recording-status="isRecording = $event"
-        />
-        
-        <!-- Show recorded audio if available -->
-        <div v-if="recordedAudioBlob" class="p-4 bg-gray-50 rounded-lg">
-          <div class="flex items-center justify-between">
-            <span class="text-sm text-gray-600">Recording ready</span>
-            <button 
-              @click="clearRecording"
-              class="text-sm text-red-600 hover:text-red-800"
+        <!-- Multiple Choice for Listening (most common) -->
+        <div v-if="question.options && question.options.length > 0" class="space-y-3">
+          <p class="text-sm text-gray-600 mb-4">
+            <strong>Instructions:</strong> Listen to the audio carefully and select the best answer based on what you hear:
+          </p>
+          <div 
+            v-for="(option, index) in question.options"
+            :key="index"
+            class="flex items-center"
+          >
+            <input
+              :id="`listening-option-${index}`"
+              v-model="selectedAnswer"
+              :value="option"
+              type="radio"
+              :name="`listening-question-${question._id}`"
+              class="h-4 w-4 text-primary focus:ring-primary border-gray-300"
+            />
+            <label 
+              :for="`listening-option-${index}`"
+              class="ml-3 text-gray-700 cursor-pointer"
             >
-              Clear
-            </button>
+              {{ option }}
+            </label>
           </div>
-          <audio 
-            :src="recordedAudioUrl" 
-            controls 
-            class="w-full mt-2"
-          ></audio>
+        </div>
+        
+        <!-- Text Input for Listening (if no options provided) -->
+        <div v-else class="space-y-4">
+          <p class="text-sm text-gray-600 mb-4">
+            <strong>Instructions:</strong> Listen to the audio carefully and provide your answer based on what you hear:
+          </p>
+          <textarea
+            v-model="textAnswer"
+            placeholder="Write your answer based on what you heard in the audio..."
+            rows="4"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+          ></textarea>
         </div>
       </div>
 
@@ -128,9 +171,10 @@
         <!-- Submit button -->
         <button
           @click="submitAnswer"
+          :disabled="!canSubmit || submitting"
           :class="[
             'px-6 py-2 rounded-lg font-medium transition-colors',
-            canSubmit && submitting
+            canSubmit && !submitting
               ? 'bg-primary text-white hover:bg-primary-dark'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
           ]"
@@ -168,13 +212,11 @@
 <script>
 import examAPI from '../../services/examAPI.js'
 import AudioPlayer from './AudioPlayer.vue'
-import AudioRecorder from './AudioRecorder.vue'
 
 export default {
   name: 'QuestionComponent',
   components: {
-    AudioPlayer,
-    AudioRecorder
+    AudioPlayer
   },
   props: {
     question: {
@@ -199,13 +241,11 @@ export default {
     return {
       selectedAnswer: '',
       textAnswer: '',
-      recordedAudioBlob: null,
-      recordedAudioUrl: null,
       submitting: false,
       submittedResponse: null,
       showFeedback: false,
       error: null,
-      isRecording: false
+      showListeningText: false
     }
   },
   computed: {
@@ -215,12 +255,15 @@ export default {
       switch (this.question.type) {
         case 'grammar':
         case 'reading':
-          return this.selectedAnswer.length > 0 || this.textAnswer.trim().length > 0
+        case 'listening':
+          // For multiple choice questions (including listening with options)
+          if (this.question.options && this.question.options.length > 0) {
+            return this.selectedAnswer.length > 0
+          }
+          // For text-based answers
+          return this.textAnswer.trim().length > 0
         case 'writing':
           return this.textAnswer.trim().length >= 50 // Minimum word requirement
-        case 'listening':
-          //return this.recordedAudioBlob !== null
-          return true
         default:
           return false
       }
@@ -237,29 +280,17 @@ export default {
       this.error = null
 
       try {
-        let response
         const timeSpent = examAPI.getQuestionTimeSpent(this.questionNumber)
-
-        if (this.question.type === 'listening' && this.recordedAudioBlob) {
-          // Submit audio file
-          response = await examAPI.submitAudioAnswer(
-            this.sessionId,
-            this.question._id,
-            this.recordedAudioBlob,
-            this.questionNumber,
-            timeSpent
-          )
-        } else {
-          // Submit text answer
-          const answer = this.selectedAnswer || this.textAnswer.trim()
-          response = await examAPI.submitAnswer(
-            this.sessionId,
-            this.question._id,
-            answer,
-            this.questionNumber,
-            timeSpent
-          )
-        }
+        
+        // Submit text answer (for all question types including listening with multiple choice)
+        const answer = this.selectedAnswer || this.textAnswer.trim()
+        const response = await examAPI.submitAnswer(
+          this.sessionId,
+          this.question._id,
+          answer,
+          this.questionNumber,
+          timeSpent
+        )
 
         this.submittedResponse = response
         this.showFeedback = true
@@ -273,19 +304,7 @@ export default {
       }
     },
 
-    handleAudioRecording(audioBlob, audioUrl) {
-      this.recordedAudioBlob = audioBlob
-      this.recordedAudioUrl = audioUrl
-    },
 
-    handleRecordingError(error) {
-      this.error = `Recording error: ${error}`
-    },
-
-    clearRecording() {
-      this.recordedAudioBlob = null
-      this.recordedAudioUrl = null
-    },
 
     handleAudioLoaded() {
       console.log('Audio loaded successfully')
@@ -326,11 +345,10 @@ export default {
         // Reset component state when question changes
         this.selectedAnswer = ''
         this.textAnswer = ''
-        this.recordedAudioBlob = null
-        this.recordedAudioUrl = null
         this.submittedResponse = null
         this.showFeedback = false
         this.error = null
+        this.showListeningText = false
       },
       immediate: true
     }
