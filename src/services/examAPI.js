@@ -240,9 +240,9 @@ examAPI.getProfile = async function() {
   }
 }
 
-// ============================
+
 // PRODUCT API EXTENSIONS
-// ============================
+
 examAPI.getAllProducts = async function(filters = {}) {
   try {
     const params = new URLSearchParams()
@@ -277,9 +277,8 @@ examAPI.seedProducts = async function() {
   }
 }
 
-// ============================
-// CART API EXTENSIONS
-// ============================
+
+// CART API EXTENSIONS 
 examAPI.addToCart = async function(productId, quantity = 1) {
   if (examAPI.isAuthenticated()) {
     try {
@@ -288,6 +287,16 @@ examAPI.addToCart = async function(productId, quantity = 1) {
         { productId, quantity },
         { headers: { Authorization: `Bearer ${token}` } }
       )
+      
+      // Update local user data if cart info is returned
+      if (response.data.cart) {
+        const userData = examAPI.getCurrentUser()
+        if (userData) {
+          userData.cartItemsCount = response.data.cart.items?.length || 0
+          localStorage.setItem('userData', JSON.stringify(userData))
+        }
+      }
+      
       return response.data
     } catch (error) {
       throw new Error(error.response?.data?.error || 'Failed to add to cart')
@@ -327,6 +336,16 @@ examAPI.removeFromCart = async function(productId) {
       const response = await axios.delete(`${API_BASE_URL}/cart/remove/${productId}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
+      
+      // Update local user data if cart info is returned
+      if (response.data.cart) {
+        const userData = examAPI.getCurrentUser()
+        if (userData) {
+          userData.cartItemsCount = response.data.cart.items?.length || 0
+          localStorage.setItem('userData', JSON.stringify(userData))
+        }
+      }
+      
       return response.data
     } catch (error) {
       throw new Error(error.response?.data?.error || 'Failed to remove from cart')
@@ -334,6 +353,26 @@ examAPI.removeFromCart = async function(productId) {
   } else {
     examAPI.removeFromLocalCart(productId)
     return { message: 'Item removed from local cart', success: true }
+  }
+}
+
+examAPI.clearCart = async function() {
+  try {
+    const token = localStorage.getItem('authToken')
+    const response = await axios.delete(`${API_BASE_URL}/cart/clear`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    
+    // Update local user data
+    const userData = examAPI.getCurrentUser()
+    if (userData) {
+      userData.cartItemsCount = 0
+      localStorage.setItem('userData', JSON.stringify(userData))
+    }
+    
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.error || 'Failed to clear cart')
   }
 }
 
@@ -362,9 +401,9 @@ examAPI.syncCart = async function() {
   return await examAPI.getCart()
 }
 
-// ============================
+
 // UTILITY METHODS
-// ============================
+
 examAPI.isAuthenticated = function() {
   const token = localStorage.getItem('authToken')
   const isAuth = localStorage.getItem('isAuthenticated')
@@ -415,9 +454,9 @@ examAPI.formatPrice = function(price, currency = 'USD') {
   }).format(price)
 }
 
-// ============================
+
 // LOCAL CART METHODS
-// ============================
+
 examAPI.getLocalCart = function() {
   const cart = localStorage.getItem('localCart')
   return cart ? JSON.parse(cart) : []
@@ -458,4 +497,162 @@ examAPI.getLocalCartTotalAmount = function() {
 
 examAPI.clearLocalCart = function() {
   localStorage.removeItem('localCart')
+}
+
+// PROFILE MANAGEMENT API EXTENSIONS
+
+examAPI.updateProfile = async function(profileData) {
+  try {
+    const token = localStorage.getItem('authToken')
+    const response = await axios.put(`${API_BASE_URL}/user/profile`, profileData, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    
+    // Update local user data
+    localStorage.setItem('userData', JSON.stringify(response.data.user))
+    
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.error || 'Failed to update profile')
+  }
+}
+
+examAPI.changePassword = async function(passwordData) {
+  try {
+    const token = localStorage.getItem('authToken')
+    const response = await axios.put(`${API_BASE_URL}/user/change-password`, passwordData, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.error || 'Failed to change password')
+  }
+}
+
+// ============================
+// SUBSCRIPTION API EXTENSIONS
+// ============================
+examAPI.getUserSubscriptions = async function() {
+  try {
+    const token = localStorage.getItem('authToken');
+    
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+    
+    const response = await axios.get(`${API_BASE_URL}/subscriptions`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      if (error.response.status === 404) {
+        throw new Error('Subscription service not available. Please ensure the backend is running.');
+      } else if (error.response.status === 401) {
+        throw new Error('Authentication failed. Please log in again.');
+      } else {
+        throw new Error(error.response.data?.error || `HTTP ${error.response.status}: Failed to get subscriptions`);
+      }
+    } else if (error.request) {
+      throw new Error('Network error: Unable to reach the subscription service');
+    } else {
+      throw new Error(error.message);
+    }
+  }
+}
+
+examAPI.getActiveSubscription = async function() {
+  try {
+    const token = localStorage.getItem('authToken');
+    
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+    
+    const response = await axios.get(`${API_BASE_URL}/subscriptions/active`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      if (error.response.status === 404) {
+        throw new Error('Subscription service not available. Please ensure the backend is running.');
+      } else if (error.response.status === 401) {
+        throw new Error('Authentication failed. Please log in again.');
+      } else {
+        throw new Error(error.response.data?.error || `HTTP ${error.response.status}: Failed to get active subscription`);
+      }
+    } else if (error.request) {
+      throw new Error('Network error: Unable to reach the subscription service');
+    } else {
+      throw new Error(error.message);
+    }
+  }
+}
+
+examAPI.createSubscription = async function(subscriptionData) {
+  try {
+    const token = localStorage.getItem('authToken');
+    
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+    
+    const response = await axios.post(`${API_BASE_URL}/subscriptions/create`, subscriptionData, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      if (error.response.status === 404) {
+        throw new Error('Subscription service not available. Please ensure the backend is running.');
+      } else if (error.response.status === 401) {
+        throw new Error('Authentication failed. Please log in again.');
+      } else {
+        throw new Error(error.response.data?.error || `HTTP ${error.response.status}: Failed to create subscription`);
+      }
+    } else if (error.request) {
+      throw new Error('Network error: Unable to reach the subscription service');
+    } else {
+      throw new Error(error.message);
+    }
+  }
+}
+
+examAPI.cancelSubscription = async function(subscriptionId, reason) {
+  try {
+    const token = localStorage.getItem('authToken')
+    const response = await axios.put(`${API_BASE_URL}/subscriptions/${subscriptionId}/cancel`, 
+      { reason }, 
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.error || 'Failed to cancel subscription')
+  }
+}
+
+examAPI.updateSubscriptionSettings = async function(subscriptionId, settings) {
+  try {
+    const token = localStorage.getItem('authToken')
+    const response = await axios.put(`${API_BASE_URL}/subscriptions/${subscriptionId}/settings`, 
+      settings, 
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.error || 'Failed to update subscription settings')
+  }
+}
+
+examAPI.formatDate = function(dateString) {
+  if (!dateString) return 'N/A'
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
 } 
