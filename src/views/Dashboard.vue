@@ -453,19 +453,24 @@ export default {
     },
     
     formattedSubscriptionFeatures() {
-      if (!this.activeSubscription?.features) return []
+      // Get features from the populated product instead of stored features
+      const productFeatures = this.activeSubscription?.product?.features || 
+                             this.activeSubscription?.features || []
       
-      return this.activeSubscription.features.map(feature => {
-        // If feature is a string, return it as is
+      return productFeatures.map(feature => {
+        // Handle different feature formats
         if (typeof feature === 'string') {
           return { name: feature, enabled: true }
         }
         
-        // If feature is an object with a name property, use that
         if (feature && typeof feature === 'object') {
-          return {
-            name: feature.name || 'Feature',
-            enabled: feature.enabled !== false
+          // Handle proper product feature format
+          if (feature.name) {
+            return { 
+              name: feature.name, 
+              enabled: feature.included !== false,
+              limit: feature.limit 
+            }
           }
         }
         
