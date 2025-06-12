@@ -114,27 +114,60 @@
           </div>
         </div>
 
-        <!-- Optional User Info -->
+        <!-- User Info Section - Different for logged in vs anonymous users -->
         <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
-          <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">
-            Optional: Save Your Results
-          </h2>
-          <p class="text-gray-600 text-center mb-6">
-            Provide your information to save your results and get personalized study recommendations.
-          </p>
-          <div class="max-w-md mx-auto grid grid-cols-1 gap-4">
-            <input
-              v-model="userInfo.name"
-              type="text"
-              placeholder="Your Name (optional)"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-            />
-            <input
-              v-model="userInfo.email"
-              type="email"
-              placeholder="Your Email (optional)"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-            />
+          <!-- For Authenticated Users -->
+          <div v-if="isAuthenticated">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">
+              Ready to Take Your Exam
+            </h2>
+            <div class="flex items-center justify-center mb-6">
+              <div class="flex items-center bg-green-50 border border-green-200 rounded-lg p-4">
+                <svg class="h-6 w-6 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <div>
+                  <p class="text-green-800 font-semibold">{{ authenticatedUser?.name || 'User' }}</p>
+                  <p class="text-green-600 text-sm">{{ authenticatedUser?.email }}</p>
+                </div>
+              </div>
+            </div>
+            <p class="text-gray-600 text-center">
+              Your results will be automatically saved to your account and available in your dashboard.
+            </p>
+          </div>
+
+          <!-- For Anonymous Users -->
+          <div v-else>
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">
+              Optional: Save Your Results
+            </h2>
+            <p class="text-gray-600 text-center mb-6">
+              Provide your information to save your results and get personalized study recommendations.
+            </p>
+            <div class="max-w-md mx-auto grid grid-cols-1 gap-4 mb-4">
+              <input
+                v-model="userInfo.name"
+                type="text"
+                placeholder="Your Name (optional)"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              />
+              <input
+                v-model="userInfo.email"
+                type="email"
+                placeholder="Your Email (optional)"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              />
+            </div>
+            <div class="text-center">
+              <p class="text-sm text-gray-500 mb-2">Or</p>
+              <router-link 
+                to="/auth" 
+                class="text-primary hover:text-primary-dark font-medium text-sm"
+              >
+                Log in to automatically save your results
+              </router-link>
+            </div>
           </div>
         </div>
 
@@ -189,6 +222,8 @@ export default {
       selectedLevel: 'A1',
       loading: false,
       error: null,
+      isAuthenticated: false,
+      authenticatedUser: null,
       userInfo: {
         name: '',
         email: ''
@@ -258,6 +293,23 @@ export default {
     }
   },
   methods: {
+    async loadUserData() {
+      // Check if user is authenticated
+      this.isAuthenticated = examAPI.isAuthenticated()
+      
+      if (this.isAuthenticated) {
+        try {
+          // Get user profile data
+          this.authenticatedUser = await examAPI.getProfile()
+        } catch (error) {
+          console.error('Failed to load user profile:', error)
+          // If profile loading fails, treat as not authenticated
+          this.isAuthenticated = false
+          this.authenticatedUser = null
+        }
+      }
+    },
+
     async startExam() {
       if (!this.selectedLevel) {
         this.error = 'Please select a starting level'
@@ -268,11 +320,22 @@ export default {
       this.error = null
 
       try {
-        // Prepare user info
-        const userInfo = (this.userInfo.name || this.userInfo.email) ? {
-          name: this.userInfo.name || null,
-          email: this.userInfo.email || null
-        } : null
+        let userInfo = null
+
+        if (this.isAuthenticated && this.authenticatedUser) {
+          // Use authenticated user data
+          userInfo = {
+            name: this.authenticatedUser.name,
+            email: this.authenticatedUser.email,
+            userId: this.authenticatedUser._id || this.authenticatedUser.id
+          }
+        } else if (this.userInfo.name || this.userInfo.email) {
+          // Use manually entered anonymous user info
+          userInfo = {
+            name: this.userInfo.name || null,
+            email: this.userInfo.email || null
+          }
+        }
 
         // Start the session
         const sessionData = await examAPI.startSession(this.selectedLevel, userInfo)
@@ -290,9 +353,12 @@ export default {
       }
     }
   },
-  mounted() {
+  async mounted() {
     // Clear any existing session data when user visits trial page
     examAPI.clearSession()
+    
+    // Load user authentication state and profile
+    await this.loadUserData()
   }
 }
 </script>
