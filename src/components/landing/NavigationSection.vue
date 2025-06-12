@@ -438,6 +438,7 @@ export default {
 
 <style scoped>
 .router-link-active {
-  @apply text-primary font-semibold;
+  color: #3B82F6;
+  font-weight: 600;
 }
 </style>
