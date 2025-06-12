@@ -230,7 +230,7 @@
             >
               <div class="mb-4">
                 <div class="w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-2" :class="getSkillIconBg(type)">
-                  <component :is="getSkillIcon(type)" class="h-8 w-8" :class="getSkillIconColor(type)" />
+                  <div class="h-8 w-8" :class="getSkillIconColor(type)" v-html="getSkillIconSvg(type)"></div>
                 </div>
                 <h4 class="text-lg font-semibold text-gray-900 capitalize">{{ type }}</h4>
               </div>
@@ -274,7 +274,7 @@
               class="border border-gray-200 rounded-lg p-6"
             >
               <h4 class="text-lg font-semibold text-gray-900 capitalize mb-4 flex items-center">
-                <component :is="getSkillIcon(type)" class="h-5 w-5 mr-2" :class="getSkillIconColor(type)" />
+                <div class="h-5 w-5 mr-2" :class="getSkillIconColor(type)" v-html="getSkillIconSvg(type)"></div>
                 {{ type }} Questions
               </h4>
               
@@ -487,35 +487,22 @@ export default {
       return '#ef4444' // red
     },
 
-    getSkillIcon(type) {
+    getSkillIconSvg(type) {
       const icons = {
-        grammar: 'BookIcon',
-        writing: 'PencilIcon', 
-        listening: 'VolumeIcon',
-        reading: 'DocumentIcon'
+        grammar: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C20.832 18.477 19.246 18 17.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+        </svg>`,
+        writing: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+        </svg>`,
+        listening: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 14.142M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>
+        </svg>`,
+        reading: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>`
       }
-      
-      // Return a functional component since we can't dynamically import icons
-      return {
-        functional: true,
-        render: (h, { props }) => {
-          const iconMap = {
-            grammar: h('svg', { attrs: { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, class: props.class }, [
-              h('path', { attrs: { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C20.832 18.477 19.246 18 17.5 18c-1.746 0-3.332.477-4.5 1.253' }})
-            ]),
-            writing: h('svg', { attrs: { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, class: props.class }, [
-              h('path', { attrs: { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z' }})
-            ]),
-            listening: h('svg', { attrs: { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, class: props.class }, [
-              h('path', { attrs: { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 14.142M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z' }})
-            ]),
-            reading: h('svg', { attrs: { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, class: props.class }, [
-              h('path', { attrs: { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' }})
-            ])
-          }
-          return iconMap[type] || iconMap.grammar
-        }
-      }
+      return icons[type] || icons.grammar
     },
 
     getSkillIconBg(type) {
